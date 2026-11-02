@@ -8,6 +8,9 @@
     <AssemblyName>MastercamMcp.Addin</AssemblyName>
     <RootNamespace>MastercamMcp.Addin</RootNamespace>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <!-- Mastercam 2027 ships its .NET 10 NET-Hook as NETHook3_0.dll (file version 29.0); prefer NETHook10_0.dll if a release adds it -->
+    <NetHookAssembly Condition="'$(NetHookAssembly)' == '' and Exists('$(MASTERCAM_ROOT)\NETHook10_0.dll')">NETHook10_0.dll</NetHookAssembly>
+    <NetHookAssembly Condition="'$(NetHookAssembly)' == ''">NETHook3_0.dll</NetHookAssembly>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\MastercamMcp.Protocol\MastercamMcp.Protocol.csproj" />
@@ -17,7 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Mastercam.App.Types">
-      <HintPath>$(MASTERCAM_ROOT)\NETHook10_0.dll</HintPath>
+      <HintPath>$(MASTERCAM_ROOT)\$(NetHookAssembly)</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>

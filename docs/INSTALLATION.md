@@ -48,6 +48,18 @@ Run the installer from PowerShell. Administrator approval is needed to copy file
 
 The add in must match the installed Mastercam release. The package does not include Mastercam's private SDK files. The installer uses the files already installed on your workstation.
 
+### Notes from a real Mastercam 2027 install
+
+These notes come from one Windows 11 workstation with Mastercam 2027 Learning Edition.
+
+- Mastercam may be installed outside `C:\Program Files`. The installer only searches there. Pass `-MastercamRoot` for any other drive.
+- The NET Hook assembly is `NETHook3_0.dll`. It targets .NET 10. There is no `NETHook10_0.dll`.
+- The `.ft` file must name the add in as `chooks\MastercamMcp.Addin.dll`. Mastercam resolves `FUNC_DLL` from its own root folder.
+- The `.ft` file needs `dnRES_NAME`. Without an embedded resource table Mastercam shows a `MissingManifestResourceException` dialog again and again.
+- With these fixes the add in builds against the installed assemblies and loads at startup without errors.
+- The Learning Edition refuses to run add ins. It shows "The requested function is not available in Mastercam Learning Edition". No live read was possible there. A full license is still needed for live acceptance.
+- If the add in faults while starting its listener, the error is written to `%LOCALAPPDATA%\mastercam-mcp\native.log`.
+
 Start the server in read only mode. Check the connection before trying any write workflow.
 
 ```powershell

@@ -38,7 +38,13 @@ namespace MastercamMcp.Addin.V2027
         {
             if (Interlocked.Exchange(ref _started, 1) != 0) return;
             _cts = new CancellationTokenSource();
-            _listenerTask = Task.Run(() => Listen(pipeName, _cts.Token));
+            var ct = _cts.Token;
+            // A fault before Listen's loop would otherwise vanish inside the unobserved task
+            _listenerTask = Task.Run(async () =>
+            {
+                try { await Listen(pipeName, ct); }
+                catch (Exception ex) { Log(ex); }
+            });
         }
 
         public static void Stop()
@@ -60,7 +66,8 @@ namespace MastercamMcp.Addin.V2027
                 NamedPipeServerStream? server = null;
                 try
                 {
-                    server = new NamedPipeServerStream(
+                    // .NET 10 has no ACL constructor; NamedPipeServerStreamAcl applies the same PipeSecurity
+                    server = NamedPipeServerStreamAcl.Create(
                         pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte,
                         PipeOptions.Asynchronous, 32 * 1024, 32 * 1024, PipeSecurity());
                     await server.WaitForConnectionAsync(ct);

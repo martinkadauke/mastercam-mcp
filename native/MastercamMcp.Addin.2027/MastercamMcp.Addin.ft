@@ -7,10 +7,13 @@
 #----------------------------------------------------------
 
 APPLICATION "MastercamMcp"
-FUNC_DLL   "MastercamMcp.Addin.dll"
+FUNC_DLL   "chooks\MastercamMcp.Addin.dll"
 RES_DLL    "SAME"
-CATEGORY   "Mastercam MCP"
+dnRES_NAME "MastercamMcp.Addin.FunctionTable"
+CATEGORY   "Add-Ins"
 
+# Mastercam 2027 resolves FUNC_DLL from its root and needs dnRES_NAME (FunctionTable.resx) or it throws
 FUNCTION NET "Run"
-    dnTIP  "Mastercam MCP"
+    FNAME  "Mastercam MCP"
+    dnTIP  "RunTip"
 END_FUNCTION

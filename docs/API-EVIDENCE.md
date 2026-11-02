@@ -55,7 +55,9 @@ Active-part identity, stock, WCS/planes, full toolpath motion, and machine simul
 
 ## Local API catalog
 
-The local API catalog now discovers every installed `NETHook*.dll` rather than only the older `NETHook3_0.dll`. That includes the `NETHook10_0.dll` family used by the Mastercam 2027 add-in when present.
+The local API catalog now discovers every installed `NETHook*.dll` rather than only the older `NETHook3_0.dll`. That includes a `NETHook10_0.dll` family if a release ships one.
+
+A real Mastercam 2027 installation (Learning Edition, `NETHook3_0.dll` file version 29.0.0.0) ships no `NETHook10_0.dll`. Its `NETHook3_0.dll` targets `.NETCoreApp,Version=v10.0`. The 2027 add-in therefore references `NETHook3_0.dll` and uses `NETHook10_0.dll` only when that file exists.
 
 The catalog records assembly hashes, versions, public types/properties/methods, loader exceptions, and the presence of the Stage-B operation contract. Proprietary assemblies remain local. Catalog output is discovery evidence only and never promotes a capability to `LIVE_READ_VERIFIED`.
 
