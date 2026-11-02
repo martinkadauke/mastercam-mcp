@@ -162,6 +162,7 @@ export function analyzeNcProgram(input: Input) {
   let arcClockwise: boolean | undefined;
   let feed: number | undefined;
   let spindle: number | undefined;
+  let spindleZero = false;
   let feedPerMinute = true;
   let constantRpm = true;
   let arcPlane: ArcPlane = "G17";
@@ -245,7 +246,10 @@ const supportedG = new Set([0, 1, 2, 3, 4, 17, 18, 19, 20, 21, 28, 30, 40, 41, 4
     if (f !== undefined) feed = f * scale;
     const s = last(parsed, "S");
     // S0 means spindle stopped (or laser off); carrying 0 as an rpm would fail the segment schema
-    if (s !== undefined) spindle = s > 0 ? s : undefined;
+    if (s !== undefined) {
+      spindleZero = s === 0;
+      spindle = spindleZero ? undefined : s;
+    }
     const t = last(parsed, "T");
     if (t !== undefined) pendingTool = t;
     if (mCodes.some(code => Math.trunc(code) === 6)) {
@@ -278,6 +282,9 @@ const supportedG = new Set([0, 1, 2, 3, 4, 17, 18, 19, 20, 21, 28, 30, 40, 41, 4
     if (motion === "feed" && (!feedPerMinute || feed === undefined)) {
       unknown(lineNumber, "feed_unknown", "Linear feed move has no known G94 feed rate");
       continue;
+    }
+    if (motion !== "rapid" && spindleZero) {
+      unknown(lineNumber, "feed_with_spindle_zero", "Feed motion while S0 is modal; the spindle may be stopped or a laser off");
     }
     const id = `L${lineNumber}`;
     if (motion === "arc") {

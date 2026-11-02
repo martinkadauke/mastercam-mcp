@@ -131,4 +131,17 @@ test("treats S0 as spindle stopped instead of failing the whole analysis", () =>
   });
   assert.equal(result.summary.parsedLinearSegments, 4);
   assert.ok(!result.risk?.findings.some(item => item.id === "spindle_limit"));
+  assert.ok(!result.findings.some(item => item.code === "feed_with_spindle_zero"), "S0 on rapids only is not a cut");
+});
+
+test("flags feed motion while S0 is modal instead of passing it silently", () => {
+  const result = analyzeNcProgram({
+    program: "G21 G90\nG0 X10 Y10 Z5\nG1 Z1 F300 S0\nG1 X20",
+    units: "mm",
+    coordinateFrame: "machine",
+    initialPosition: { x: 0, y: 0, z: 50 },
+    machine
+  });
+  assert.equal(result.status, "REVIEW");
+  assert.equal(result.findings.filter(item => item.code === "feed_with_spindle_zero").length, 2);
 });
