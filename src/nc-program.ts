@@ -244,7 +244,8 @@ const supportedG = new Set([0, 1, 2, 3, 4, 17, 18, 19, 20, 21, 28, 30, 40, 41, 4
     const f = last(parsed, "F");
     if (f !== undefined) feed = f * scale;
     const s = last(parsed, "S");
-    if (s !== undefined) spindle = s;
+    // S0 means spindle stopped (or laser off); carrying 0 as an rpm would fail the segment schema
+    if (s !== undefined) spindle = s > 0 ? s : undefined;
     const t = last(parsed, "T");
     if (t !== undefined) pendingTool = t;
     if (mCodes.some(code => Math.trunc(code) === 6)) {

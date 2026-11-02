@@ -119,3 +119,16 @@ test("requires explicit motion mode and keeps G95 feed timing unknown", () => {
   assert.ok(result.findings.some(item => item.code === "feed_per_revolution"));
   assert.ok(result.findings.some(item => item.code === "feed_unknown"));
 });
+
+test("treats S0 as spindle stopped instead of failing the whole analysis", () => {
+  // Laser blocks on some routers (e.g. Carvera) toggle power with S0 between burns
+  const result = analyzeNcProgram({
+    program: "G21 G90\nG0 X10 Y10 Z5 S0\nG1 X20 F1000 S0.4\nG0 X30 S0\nG1 X40 F1000 S8000",
+    units: "mm",
+    coordinateFrame: "machine",
+    initialPosition: { x: 0, y: 0, z: 50 },
+    machine
+  });
+  assert.equal(result.summary.parsedLinearSegments, 4);
+  assert.ok(!result.risk?.findings.some(item => item.id === "spindle_limit"));
+});
